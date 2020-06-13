@@ -16,7 +16,7 @@ public class Station {
     Station next;               //下一站
     Station before;             //上一站
     //构造函数
-    Station(String fn,String n,int dtf){
+    public Station(String fn,String n,int dtf){
         this.no=totalStation-1;
         if(totalStation!=1)
         {

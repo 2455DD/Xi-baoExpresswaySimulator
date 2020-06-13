@@ -54,36 +54,10 @@ public class Carrier {
 }
 class Car extends Carrier{
 }
-class Volve extends Car{
-    Volve(int target,Station whereami){
-        speed=2;
-        maximumPassenger=40;
-        this.uid=carOnRoad;
-        this.carriertype="Volve";
-        this.target=target;
-        this.nextStation=whereami.next;
-        this.DistanceToFormerStation=0;
-        Carrier.carOnRoad++;
-        Integer tempUID = uid;
-        Carrier.carrierMap.put(tempUID,this);
-    }
-}
-class Iveco extends Car{
-    Iveco(int givennum,int target,Station whereami){
-        speed=1.4;
-        maximumPassenger=21;
-        this.uid=givennum;
-        this.carriertype="Iveco";
-        this.target=target;
-        this.nextStation=whereami.next;
-        this.DistanceToFormerStation=0;
-        Integer tempUID = uid;
-        Carrier.carrierMap.put(tempUID,this);
-    }
-}
+
 class Passenger {
     Station target;
-    Passenger(){
+    public Passenger(){
         this.target=Station.stationMap.get(this.targetGenerate(7));
     }
     private int targetGenerate(int hiLimit){

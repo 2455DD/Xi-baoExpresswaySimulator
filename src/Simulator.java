@@ -12,6 +12,14 @@ public class Simulator
         4、Java-IO到文件以及可能的GUI设计
                                                     ——何浩文
      */
+    Simulator(){
+        Station XN=new Station("Xian","XN",22);
+        Station CP=new Station("CaiJiaPo","CP",22);
+        Station XP=new Station("XinPing","XP",21);
+
+
+    }
+
 }
 class Timer extends Thread{
     int currentTime;                      //时间放大比 1:630,单位为秒，判断依据为21/2
