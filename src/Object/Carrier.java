@@ -4,10 +4,10 @@ import java.util.*;
 
 public class Carrier {
     //属性
-    static Map<Integer,Carrier> carrierMap=new HashMap<Integer, Carrier>();
+    public static Map<Integer,Carrier> carrierMap=new HashMap<Integer, Carrier>();
     int uid;                             //识别码
-    static int carOnRoad=1;            //载具数
-    String carriertype;
+    public static int carOnRoad=1;            //载具数
+    String carrierType;
     double DistanceToFormerStation;     //距离前站距离
     int maximumPassenger;               //最大运载量
     Station nextStation;                //下一站
@@ -19,7 +19,7 @@ public class Carrier {
     int presentPassenger=0;             //现有乘客
     //方法
     String returnLocation(int time) {        //返回当前位置
-        return this.carriertype+this.uid+"离上一站 "+this.nextStation.returnFullName()+" 已有"+(this.DistanceToFormerStation)+"米。下一站是 "+this.nextStation.returnFullName();
+        return this.carrierType+this.uid+"离上一站 "+this.nextStation.returnFullName()+" 已有"+(this.DistanceToFormerStation)+"米。下一站是 "+this.nextStation.returnFullName();
     }
     boolean isFull() {   //更新queueIsFull并返回其最新值
         if(presentPassenger==maximumPassenger)queueIsFull=true;
@@ -57,11 +57,19 @@ class Car extends Carrier{
 
 class Passenger {
     Station target;
+    static Integer globalPassengersStatistic= 1;
+    Integer uid;
+    static Map<Integer,Passenger> passengerMap=new HashMap<Integer, Passenger>();
     public Passenger(){
+        this.uid=globalPassengersStatistic++;
         this.target=Station.stationMap.get(this.targetGenerate(7));
+        Passenger.passengerMap.put(uid,this);
     }
     private int targetGenerate(int hiLimit){
         Random random=new Random();
         return random.nextInt(hiLimit);
+    }
+    public Integer returnUID(){
+        return this.uid;
     }
 }

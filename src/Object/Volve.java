@@ -5,7 +5,7 @@ public class Volve extends Car{
         speed=2;
         maximumPassenger=40;
         this.uid=carOnRoad;
-        this.carriertype="Volve";
+        this.carrierType="Volve";
         this.target=target;
         this.nextStation=whereami.next;
         this.DistanceToFormerStation=0;

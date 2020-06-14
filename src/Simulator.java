@@ -1,8 +1,19 @@
 import java.lang.*;
 import Object.*;
-public class Simulator
-{
-    Timer global=new Timer();
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+
+public class Simulator extends Thread {
+    int currentTime;                      //时间放大比 1:630,单位为秒，判断依据为21/2
+    int secs;
+    int mins;
+    int hours;
+    Set<Carrier> carrierOnRoad=new HashSet<Carrier>();
+    Map<Integer,Station> totalStationMap=new HashMap<Integer,Station>();
     //Under Construction
 
     /*          To-Do List
@@ -12,53 +23,64 @@ public class Simulator
         4、Java-IO到文件以及可能的GUI设计
                                                     ——何浩文
      */
-    Simulator(){
-        Station XN=new Station("Xian","XN",22);
-        Station CP=new Station("CaiJiaPo","CP",22);
-        Station XP=new Station("XinPing","XP",21);
-
-
+    Simulator() {
+        currentTime = 0;
+        secs = 0;
+        mins = 0;
+        hours = 0;
     }
 
-}
-class Timer extends Thread{
-    int currentTime;                      //时间放大比 1:630,单位为秒，判断依据为21/2
-    int secs;
-    int mins;
-    int hours;
 
-    Timer(){
-        currentTime=0;
-        secs=0;
-        mins=0;
-        hours=0;
-    }
-
-    public void run(){
-        try {
-            while(true) {
-                secs=currentTime%60;
-                mins=currentTime/60;
-                hours=mins/60;
-                if(currentTime!=0)mins%=mins;
-                if(hours*60*60+mins*60+secs>=42497)break;              //(18-8.5)*60*60+((24+21+62+21+24+22)/1.4+7*2)
-                else {
-                    Timer.sleep(1000);
-                    currentTime+=630;
-                }
+    public static void main(String[] args) throws InterruptedException {
+        Simulator Simulation = new Simulator();
+        Simulation.init();
+        while (true) {
+            if (Simulation.returnCurrentTime() >= 37940) break;  //(18-7.5)*60*60+((24+21+62+21+24+22)/1.4+7*2)
+            else {
+                Simulation.timeChange();
+                Simulator.sleep(1000);
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        }
+    }
+        void init(){
+            Scanner scanner=new Scanner(System.in);
+            int xnv,xni,bjv,bji;
+            System.out.println("请依次输入XN拥有沃尔沃和依维柯客车(分别为XNW和XNY辆)，BJ拥有沃尔沃和依维柯客车（分别为BJW和BJY辆）:");
+            xnv=scanner.nextInt();xni=scanner.nextInt();bjv=scanner.nextInt();bji=scanner.nextInt();
+            //车站初始化
+            for(int i=0;i<7;i++){
+                System.out.println("请依次输入站名、简称（前两个请输入完后换行）以及到前站的距离：");
+                String fnn= scanner.nextLine();
+                String abn= scanner.nextLine();
+                int fmd=scanner.nextInt();
+                this.totalStationMap.put(i+1,new Station(fnn,abn,fmd));
+                System.out.println("第"+(i+1)+"车站"+fnn+"已添加.");
+            }
+            //初始车辆生成
+            for(int i=0;i<xnv;i++){
+                this.totalStationMap.get(1).generateCarrier("Volve",2);
+            }
+            for(int i=0;i<xni;i++){
+                this.totalStationMap.get(1).generateCarrier("Iveco",2);
+            }
+            for(int i=0;i<bji;i++){
+                this.totalStationMap.get(7).generateCarrier("Iveco",1);
+            }
+            for(int i=0;i<bjv;i++){
+                this.totalStationMap.get(7).generateCarrier("Volve",1);
+            }
+        }
+        int returnCurrentTime () {
+            return this.hours * 60 * 60 + this.mins * 60 + this.secs;
+        }
+        void timeChange () {
+            this.currentTime += 630;
+            this.secs = this.currentTime % 60;
+            this.mins = this.currentTime / 60;
+            this.hours = this.mins / 60;
+            if (this.currentTime != 0) this.mins %= this.mins;
         }
 
-    }
-    int[] returnCurrentTime(){
-        int secs=currentTime%60;
-        int mins=currentTime/60;
-        int hours=mins/60;
-        mins%=mins;
-        return new int[]{hours, mins, secs};
-    }
-}
 
+}
 
