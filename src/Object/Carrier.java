@@ -8,7 +8,7 @@ public class Carrier {
     public int uid;                             //识别码
     public static int carOnRoad=1;            //载具数
     public String carrierType;
-    double DistanceToFormerStation;     //距离前站距离
+    public double DistanceToFormerStation;     //距离前站距离
     int maximumPassenger;               //最大运载量
     public Station nextStation;                //下一站
     public Set<Passenger> passengerCollection=new HashSet<Passenger>();    //运载乘客
@@ -38,18 +38,20 @@ public class Carrier {
     }
     public int arriveStation(){       //到站行为
         int ans=0;
-        for(Passenger e:this.passengerCollection)
-        {
+        Iterator<Passenger> iterator= this.passengerCollection.iterator();
+
+        while(iterator.hasNext()){
+            Passenger e = iterator.next();
             if(e.target.equals(this.nextStation)) {
                 ans++;
-                passengerCollection.remove(e);
+                iterator.remove();//注意，details at https://www.cnblogs.com/dolphin0520/p/3933551.html
                 this.nextStation.passengerDownload++;
             }
         }
         return ans;
     }
     public boolean passengerEmbark(Passenger a) {   //上载具
-        if(!queueIsFull)return false;
+        if(queueIsFull)return false;
         else {
             passengerCollection.add(a);
             presentPassenger++;
@@ -57,31 +59,10 @@ public class Carrier {
         return true;
     }
     public void carrierMovePerMinutes(){
-        if(this.target==1){
             this.DistanceToFormerStation+=speed;
-
-        }
     }
 
 }
 class Car extends Carrier{
 }
 
-class Passenger {
-    Station target;
-    static Integer globalPassengersStatistic= 1;
-    Integer uid;
-    static Map<Integer,Passenger> passengerMap=new HashMap<Integer, Passenger>();
-    public Passenger(){
-        this.uid=globalPassengersStatistic++;
-        this.target=Station.stationMap.get(this.targetGenerate(7));
-        Passenger.passengerMap.put(uid,this);
-    }
-    private int targetGenerate(int hiLimit){
-        Random random=new Random();
-        return random.nextInt(hiLimit);
-    }
-    public Integer returnUID(){
-        return this.uid;
-    }
-}

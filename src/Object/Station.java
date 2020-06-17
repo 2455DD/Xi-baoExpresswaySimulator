@@ -8,14 +8,15 @@ public class Station {
     int no;                     //编码
 	String Fullname;            //全称：用于输出
     String Name;                //简写
-    List<Carrier> carrierQueue=new ArrayList<Carrier>();    //当前站内载具
-    public Map<Integer,Passenger> passengerInStation;    //站内乘客：仅在首站和终点站有实际意义
-    int DistanceToFormer;       //到前一站距离
+    public List<Carrier> carrierQueue=new ArrayList<Carrier>();    //当前站内载具
+    public List<Passenger> passengerInStation=new ArrayList<Passenger>();    //站内乘客：仅在首站和终点站有实际意义
+    int DistanceToFormer=0;       //到前一站距离
     int DistanceToLatter;       //到后一站距离
     int passengerDownload=0;    //到站人数
     Station next;               //下一站
     Station before;             //上一站
     boolean firstStation=false;
+    public int passengerNumberinStation=0;
     //构造函数
     public Station(String fn,String n,int dtf){
         this.no=totalStation-1;
@@ -51,9 +52,14 @@ public class Station {
     {
     	return this.DistanceToFormer;
     }
+    public int distancetoLatterStation()
+    {
+        return this.DistanceToLatter;
+    }
     public void generatePassenger(){
         Passenger newPassenger=new Passenger();
-        this.passengerInStation.put(newPassenger.uid,newPassenger);
+        this.passengerInStation.add(newPassenger);
+        this.passengerNumberinStation++;
     }
     public int generateCarrier(String type,int target,Station e){
         Carrier newCarrier = new Volve(target, e);
