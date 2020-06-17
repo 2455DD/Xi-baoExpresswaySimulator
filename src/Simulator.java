@@ -14,57 +14,50 @@ public class Simulator extends Thread {
     int hours;
     Set<Carrier> carrierOnRoad=new HashSet<Carrier>();
     Map<Integer,Station> totalStationMap=new HashMap<Integer,Station>();
-    File log=new File("./log.txt");
+    File log=new File("D:\\Develop\\ExpressWaySimulation\\Xi-baoExpresswaySimulator\\Xi-baoExpresswaySimulator\\src\\log.txt");
     timer timeCounter=new timer();
-    //Under Construction
-
-    /*          To-Do List
-        1、实现时间的迭代变化——暂定使用线程睡眠+死循环（满足x条件跳出）
-        2、随时间生成Carrier
-        3、实现数据统计
-        4、Java-IO到文件以及可能的GUI设计
-                                                    ——何浩文
-     */
+    //构造函数——重置时间
     Simulator() {
         currentTime = 0;
         mins = 0;
         hours = 0;
     }
-
-    void init(){
-        Scanner scanner=new Scanner(System.in);
-        int xnv,xni,bjv,bji;
+    //模拟初始化函数
+    void init() throws FileNotFoundException {
+        //使用Scanner类读取文件来实现对车站和初始车辆的生成，位置为/src/input.txt，要注意的是编码一定要写
+        Scanner scanner=new Scanner(new File("D:\\Develop\\ExpressWaySimulation\\Xi-baoExpresswaySimulator\\Xi-baoExpresswaySimulator\\src\\input.txt"),"Unicode");
+        int xnv,xni,bjv,bji;//
         System.out.println("请依次输入XN拥有沃尔沃和依维柯客车(分别为XNW和XNY辆)，BJ拥有沃尔沃和依维柯客车（分别为BJW和BJY辆）:");
-        xnv=scanner.nextInt();xni=scanner.nextInt();bjv=scanner.nextInt();bji=scanner.nextInt();
+        xnv=scanner.nextInt();
+        xni=scanner.nextInt();
+        bjv=scanner.nextInt();
+        bji=scanner.nextInt();
         //车站初始化
         for(int i=0;i<7;i++){
-            System.out.println("请依次输入站名、简称（前两个请输入完后换行）以及到前站的距离：");
-            String fnn= scanner.nextLine();
-            String abn= scanner.nextLine();
+            //System.out.println("请依次输入站名、简称（前两个请输入完后换行）以及到前站的距离：");
+            String fnn= scanner.next();
+            String abn= scanner.next();
             int fmd=scanner.nextInt();
+            System.out.println();
             this.totalStationMap.put(i+1,new Station(fnn,abn,fmd));
             System.out.println("第"+(i+1)+"车站"+fnn+"已添加.");
         }
-        //初始车辆生成
         for(int i=0;i<xnv;i++){
-            int uid=this.totalStationMap.get(1).generateCarrier("Volve",2);
+            int uid=this.totalStationMap.get(1).generateCarrier("Volve",2,this.totalStationMap.get(1));
             Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(2);
         }
         for(int i=0;i<xni;i++){
-            int uid=this.totalStationMap.get(1).generateCarrier("Iveco",2);
+            int uid=this.totalStationMap.get(1).generateCarrier("Iveco",2,this.totalStationMap.get(1));
             Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(2);
         }
         for(int i=0;i<bji;i++){
-            int uid=this.totalStationMap.get(7).generateCarrier("Iveco",1);
+            int uid=this.totalStationMap.get(7).generateCarrier("Iveco",1,this.totalStationMap.get(7));
             Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(2);
         }
         for(int i=0;i<bjv;i++){
-            int uid=this.totalStationMap.get(7).generateCarrier("Volve",1);
+            int uid=this.totalStationMap.get(7).generateCarrier("Volve",1,this.totalStationMap.get(7));
             Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(2);
         }
-    }
-    String returnCurrentTime () {
-        return this.hours +"时 "+ this.mins +"分 ";
     }
     public void timeChange(){
         this.currentTime += 60;
@@ -74,7 +67,11 @@ public class Simulator extends Thread {
             this.hours++;
         }
     }
+    String returnCurrentTime () {
+        return hours +"时 "+ mins +"分 ";
+    }
     public void writeLog(String message){
+        System.out.println(message);
         try (Writer writer = new FileWriter(log)) {
             // 把内容转换成字节数组
             char[] data = message.toCharArray();
@@ -84,12 +81,17 @@ public class Simulator extends Thread {
             e.printStackTrace();
         }
     }
-    public static void main(String[] args) {
+    public static void main(String[] args)  {
         Simulator Simulation = new Simulator();
-        Simulation.init();
-        Simulation.timeCounter.start();
+        try {
+            Simulation.init();
+        }
+        catch (FileNotFoundException e){
+            System.out.println("文件Input.txt不存在");
+            e.printStackTrace();
+        }
         while (true) {
-            Simulation.timeCounter.run();
+            Simulation.timeCounter.start();
             if (Simulation.hours>= 18&&Simulation.carrierOnRoad.isEmpty()) break;  //(18-7.5)*60*60+((24+21+62+21+24+22)/1.4+7*2)
             else {
                 for(Carrier e:Simulation.carrierOnRoad){
@@ -119,8 +121,7 @@ public class Simulator extends Thread {
         }
     }
     class timer extends Thread{
-        Simulator Simulation;
-        private Thread thread;
+        private Thread thread=new Thread(this);
 
         @Override
         public synchronized void start() {
@@ -131,13 +132,24 @@ public class Simulator extends Thread {
     }
         @Override
         public void run() {
-            Simulation.timeChange();
+            timeChange();
             try {
-                Simulator.sleep(1000);
+                Simulator.sleep(10);
             } catch (InterruptedException e) {
-                System.out.println("错误：线程错误(类JudgeAction)，运行时间为" + Simulation.returnCurrentTime());
+                System.out.println("错误：线程错误(类JudgeAction)，运行时间为" + returnCurrentTime());
                 e.printStackTrace();
             }
+        }
+        void timeChange(){
+            currentTime += 60;
+            if(mins<50)mins +=1;
+            else{
+                mins=0;
+                hours++;
+            }
+        }
+        String returnCurrentTime () {
+            return hours +"时 "+ mins +"分 ";
         }
     }
 }

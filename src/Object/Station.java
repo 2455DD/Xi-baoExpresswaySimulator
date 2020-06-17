@@ -8,7 +8,7 @@ public class Station {
     int no;                     //编码
 	String Fullname;            //全称：用于输出
     String Name;                //简写
-    Queue<Carrier> carrierQueue;    //当前站内载具
+    List<Carrier> carrierQueue=new ArrayList<Carrier>();    //当前站内载具
     public Map<Integer,Passenger> passengerInStation;    //站内乘客：仅在首站和终点站有实际意义
     int DistanceToFormer;       //到前一站距离
     int DistanceToLatter;       //到后一站距离
@@ -55,13 +55,10 @@ public class Station {
         Passenger newPassenger=new Passenger();
         this.passengerInStation.put(newPassenger.uid,newPassenger);
     }
-    public int generateCarrier(String type,int target){
-        Carrier newCarrier;
+    public int generateCarrier(String type,int target,Station e){
+        Carrier newCarrier = new Volve(target, e);
         if(type.equals("Iveco")){
-            newCarrier = new Iveco(target, this);
-        }
-        else {
-            newCarrier = new Volve(target, this);
+            newCarrier = new Iveco(target, e);
         }
         this.carrierQueue.add(newCarrier);
         return newCarrier.uid;
@@ -75,3 +72,4 @@ public class Station {
         return Station.stationMap.get(no);
     }
 }
+
