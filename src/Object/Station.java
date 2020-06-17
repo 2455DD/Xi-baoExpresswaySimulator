@@ -3,13 +3,13 @@ package Object;
 import java.util.*;
 
 public class Station {
-    static Map<Integer,Station> stationMap=new HashMap<Integer, Station>();
+    public static Map<Integer,Station> stationMap=new HashMap<Integer, Station>();
     static int totalStation=1;
     int no;                     //编码
 	String Fullname;            //全称：用于输出
     String Name;                //简写
     Queue<Carrier> carrierQueue;    //当前站内载具
-    Map<Integer,Passenger> passengerInStation;    //站内乘客：仅在首站和终点站有实际意义
+    public Map<Integer,Passenger> passengerInStation;    //站内乘客：仅在首站和终点站有实际意义
     int DistanceToFormer;       //到前一站距离
     int DistanceToLatter;       //到后一站距离
     int passengerDownload=0;    //到站人数
@@ -55,7 +55,7 @@ public class Station {
         Passenger newPassenger=new Passenger();
         this.passengerInStation.put(newPassenger.uid,newPassenger);
     }
-    public void generateCarrier(String type,int target){
+    public int generateCarrier(String type,int target){
         Carrier newCarrier;
         if(type.equals("Iveco")){
             newCarrier = new Iveco(target, this);
@@ -64,7 +64,7 @@ public class Station {
             newCarrier = new Volve(target, this);
         }
         this.carrierQueue.add(newCarrier);
-
+        return newCarrier.uid;
     }
 
     public String returnName() {return this.Name;}
