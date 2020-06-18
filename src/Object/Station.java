@@ -10,7 +10,7 @@ public class Station {
     String Name;                //简写
     public List<Carrier> carrierQueue=new ArrayList<Carrier>();    //当前站内载具
     public List<Passenger> passengerInStation=new ArrayList<Passenger>();    //站内乘客：仅在首站和终点站有实际意义
-    int DistanceToFormer=0;       //到前一站距离
+    int DistanceToFormer;       //到前一站距离
     int DistanceToLatter;       //到后一站距离
     int passengerDownload=0;    //到站人数
     Station next;               //下一站
@@ -30,7 +30,10 @@ public class Station {
             this.DistanceToFormer=0;
             firstStation=true;
         }
-        if(totalStation==7)firstStation=true;
+        if(totalStation==7){
+            firstStation=true;
+            this.DistanceToLatter=0;
+        }
         this.Fullname=fn;
     	this.Name=n;
     	this.DistanceToFormer=dtf;

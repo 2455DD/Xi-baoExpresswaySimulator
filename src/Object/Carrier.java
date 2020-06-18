@@ -18,22 +18,35 @@ public class Carrier {
     public int timerFromLeave=0;               //从上一次离站，单位为分钟
     public int presentPassenger=0;             //现有乘客
     //方法
-    public String returnLocation(int time) {        //返回当前位置
+    public String returnLocation() {        //返回当前位置
         return this.carrierType+this.uid+"离上一站 "+this.nextStation.returnFullName()+" 已有"+(this.DistanceToFormerStation)+"米。下一站是 "+this.nextStation.returnFullName();
     }
-    public boolean isFull() {   //更新queueIsFull并返回其最新值
+    public boolean isEmpty() {   //更新queueIsFull并返回其最新值
         if(presentPassenger==maximumPassenger)queueIsFull=true;
-        return queueIsFull;
+        return !queueIsFull;
     }
     public void leaveStation() {    //离站
-        if(this.target==1){
+        if(this.target==1&&this.nextStation.no!=6){
             this.DistanceToFormerStation=this.nextStation.DistanceToLatter;
             this.nextStation=this.nextStation.next;
         }
         else{
-            this.DistanceToFormerStation=this.nextStation.DistanceToFormer;
-            this.nextStation=this.nextStation.before;
+            if (this.nextStation.no==6){
+                this.nextStation=this.nextStation.before;
+                this.DistanceToFormerStation=this.nextStation.DistanceToFormer;
+            }
+
+            if(this.target==2&&this.nextStation.no!=0){
+                this.DistanceToFormerStation=this.nextStation.DistanceToFormer;
+                this.nextStation=this.nextStation.before;
+            }
+            else {
+                this.DistanceToFormerStation=this.nextStation.DistanceToLatter;
+                this.nextStation=this.nextStation.next;
+            }
+
         }
+
         this.timerFromLeave=0;
     }
     public int arriveStation(){       //到站行为

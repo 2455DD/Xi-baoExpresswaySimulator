@@ -141,10 +141,10 @@ class JudgeAction extends Thread {
     void judge(Carrier e) throws InterruptedException {
         boolean flag1=true;
         boolean flag2=true;
-        System.out.println(temp++);
+        System.out.println(e.uid+"正在运行"+e.returnLocation());
         for(Carrier a:Simulation.totalStationMap.get(1).carrierQueue){
             if(e.equals(a)&&flag1){
-                for(int i=0;!e.queueIsFull&&Simulation.totalStationMap.get(1).passengerNumberinStation>0;i++){
+                for(int i=0;e.isEmpty()&&Simulation.totalStationMap.get(1).passengerNumberinStation>0;i++){
                     if(!Simulation.totalStationMap.get(1).passengerInStation.isEmpty()){
                         e.passengerEmbark(Simulation.totalStationMap.get(1).passengerInStation.get(Simulation.totalStationMap.get(1).passengerNumberinStation-1));
                         Simulation.totalStationMap.get(1).passengerInStation.remove(Simulation.totalStationMap.get(1).passengerNumberinStation-1);
@@ -156,7 +156,7 @@ class JudgeAction extends Thread {
         }
         for(Carrier a:Simulation.totalStationMap.get(7).carrierQueue){
             if(e.equals(a)&&flag2){
-                for(int i=0;!e.queueIsFull&&Simulation.totalStationMap.get(7).passengerNumberinStation>0;i++){
+                for(int i=0;e.isEmpty()&&Simulation.totalStationMap.get(7).passengerNumberinStation>0;i++){
                     if(!Simulation.totalStationMap.get(7).passengerInStation.isEmpty()){
                         e.passengerEmbark(Simulation.totalStationMap.get(7).passengerInStation.get(Simulation.totalStationMap.get(7).passengerNumberinStation-1));
                         Simulation.totalStationMap.get(7).passengerInStation.remove(Simulation.totalStationMap.get(7).passengerNumberinStation-1);
@@ -167,18 +167,32 @@ class JudgeAction extends Thread {
             }
         }
         try {
-            if ((e.DistanceToFormerStation < e.nextStation.distancetoFormerStation() && e.target == 1) || (e.DistanceToFormerStation < e.nextStation.distancetoLatterStation() && e.target == 2))
+            if ((e.target == 1&&e.DistanceToFormerStation < e.nextStation.distancetoFormerStation()) || ( e.target == 2 &&e.DistanceToFormerStation < e.nextStation.distancetoLatterStation()))
                 e.carrierMovePerMinutes();
             else {
-                int downloadNum = e.arriveStation();
+                int downloadNum = e. arriveStation();
                 Simulation.writeLog(Simulation.returnCurrentTime() + "编号为" + e.uid + "的" + e.carrierType + "到达站点" + e.nextStation.returnFullName() + "并有" + downloadNum + "人下车\n");
                 if (downloadNum != 0) {
                     Thread.sleep(20);
-                    e.leaveStation();
+                    if(!e.nextStation.equals(Simulation.totalStationMap.get(7))||!e.nextStation.equals(Simulation.totalStationMap.get(1)))e.leaveStation();
+                    else{
+                        if(e.nextStation.equals(Simulation.totalStationMap.get(7))){
+                            e.target=2;
+                            e.nextStation=Simulation.totalStationMap.get(6);
+                        }
+                        if(e.nextStation.equals(Simulation.totalStationMap.get(1))){
+                            e.target=1;
+                            e.nextStation=Simulation.totalStationMap.get(2);
+                        }
+
+                        e.leaveStation();
+                    }
                 }
+                else e.leaveStation();
+
             }
         }
-        catch(Exception ex){
+        catch(NullPointerException ex){
             System.out.println(e.uid+"号车在"+e.nextStation+"处翻车，时间是"+Simulation.returnCurrentTime());
             ex.printStackTrace();
         }
