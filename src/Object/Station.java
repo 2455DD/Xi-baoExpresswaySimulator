@@ -62,12 +62,16 @@ public class Station {
         this.passengerNumberinStation++;
     }
     public int generateCarrier(String type,int target,Station e){
-        Carrier newCarrier = new Volve(target, e);
         if(type.equals("Iveco")){
-            newCarrier = new Iveco(target, e);
+            Carrier newCarrier = new Iveco(target, e);
+            this.carrierQueue.add(newCarrier);
+            return newCarrier.uid;
         }
-        this.carrierQueue.add(newCarrier);
-        return newCarrier.uid;
+        else {
+            Carrier newCarrier = new Volve(target, e);
+            this.carrierQueue.add(newCarrier);
+            return newCarrier.uid;
+        }
     }
 
     public String returnName() {return this.Name;}

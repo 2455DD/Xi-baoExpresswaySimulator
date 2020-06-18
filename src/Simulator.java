@@ -54,12 +54,12 @@ public class Simulator extends Thread {
         }
         for(int i=0;i<bji;i++){
             int uid=this.totalStationMap.get(7).generateCarrier("Iveco",1,this.totalStationMap.get(7));
-            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(2);
+            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(6);
             this.carrierOnRoad.add(Carrier.carrierMap.get(uid));
         }
         for(int i=0;i<bjv;i++){
             int uid=this.totalStationMap.get(7).generateCarrier("Volve",1,this.totalStationMap.get(7));
-            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(2);
+            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(6);
             this.carrierOnRoad.add(Carrier.carrierMap.get(uid));
         }
     }
