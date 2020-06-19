@@ -2,26 +2,26 @@ import java.io.*;
 import java.lang.*;
 import Object.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.sql.Time;
+import java.util.*;
 
-public class Simulator extends Thread {
+public class Simulator extends Thread{
     int currentTime;                      //时间放大比 1:60,单位为秒
     int mins;
     int hours;
+    Thread timerThread = new timer(this);
+    Thread passengerGenerateThread = new passengerGenerate(this);
+    Thread judgeThread = new JudgeAction(this);
 
     Set<Carrier> carrierOnRoad=new HashSet<Carrier>();
     Map<Integer,Station> totalStationMap=new HashMap<Integer,Station>();
-    File log=new File("D:\\Develop\\ExpressWaySimulation\\Xi-baoExpresswaySimulator\\Xi-baoExpresswaySimulator\\src\\log.txt");
+    File log=new File("Xi-baoExpresswaySimulator\\src\\log.txt");
 //    timer timeCounter=new timer();
     //构造函数——重置时间
     Simulator() {
         currentTime =0;
         mins = 30;
-        hours = 6;
+        hours = 7;
     }
     //模拟初始化函数
     void init() throws FileNotFoundException {
@@ -43,40 +43,28 @@ public class Simulator extends Thread {
             System.out.println("第"+(i+1)+"车站"+fnn+"已添加.");
         }
         for(int i=0;i<xnv;i++){
-            int uid=this.totalStationMap.get(1).generateCarrier("Volve",2,this.totalStationMap.get(1));
-            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(2);
-            this.carrierOnRoad.add(Carrier.carrierMap.get(uid));
+            int uid=this.totalStationMap.get(1).generateCarrier("Volve",1,this.totalStationMap.get(1));
+            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(1);
         }
         for(int i=0;i<xni;i++){
-            int uid=this.totalStationMap.get(1).generateCarrier("Iveco",2,this.totalStationMap.get(1));
-            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(2);
-            this.carrierOnRoad.add(Carrier.carrierMap.get(uid));
+            int uid=this.totalStationMap.get(1).generateCarrier("Iveco",1,this.totalStationMap.get(1));
+            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(1);
         }
         for(int i=0;i<bji;i++){
-            int uid=this.totalStationMap.get(7).generateCarrier("Iveco",1,this.totalStationMap.get(7));
-            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(6);
-            this.carrierOnRoad.add(Carrier.carrierMap.get(uid));
+            int uid=this.totalStationMap.get(7).generateCarrier("Iveco",2,this.totalStationMap.get(7));
+            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(7);
         }
         for(int i=0;i<bjv;i++){
-            int uid=this.totalStationMap.get(7).generateCarrier("Volve",1,this.totalStationMap.get(7));
-            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(6);
-            this.carrierOnRoad.add(Carrier.carrierMap.get(uid));
-        }
-    }
-    public void timeChange(){
-        this.currentTime += 60;
-        if(this.mins<50)this.mins +=1;
-        else{
-            this.mins=0;
-            this.hours++;
+            int uid=this.totalStationMap.get(7).generateCarrier("Volve",2,this.totalStationMap.get(7));
+            Carrier.carrierMap.get(uid).nextStation=this.totalStationMap.get(7);
         }
     }
     String returnCurrentTime () {
         return hours +"时 "+ mins +"分 ";
     }
     public void writeLog(String message){
-        System.out.println(message);
-        try (Writer writer = new FileWriter(log)) {
+        //System.out.println(message);
+        try (Writer writer = new FileWriter(log,true)) {
             // 把内容转换成字节数组
             char[] data = message.toCharArray();
             // 向文件写入内容
@@ -85,9 +73,8 @@ public class Simulator extends Thread {
             e.printStackTrace();
         }
     }
-    public static void main(String[] args)  {
+    public static void main(String[] args){
         Simulator Simulation = new Simulator();
-        Thread mainThread=new Thread();
         //初始化模拟过程——构建车站与初始车辆
         try {
             Simulation.init();
@@ -96,39 +83,43 @@ public class Simulator extends Thread {
             System.out.println("文件Input.txt不存在");
             e.printStackTrace();
         }
-        Thread timerThread=new timer(Simulation);
-        Thread passengerGenerateThread=new passengerGenerate(Simulation);
-        Thread judgeThread=new JudgeAction(Simulation);
+
         //模拟过程
         while (true) {
-            try{timerThread.run();
-                timerThread.join();
-                passengerGenerateThread.run();
-                passengerGenerateThread.join();
+            try{Simulation.timerThread.run();
+                Simulation.timerThread.join();
+                if((Simulation.hours==7&&Simulation.mins>=30)||(Simulation.hours>7&&Simulation.hours<18)){        //只在规定时间内发车
+                    Simulation.passengerGenerateThread.run();
+                    Simulation.passengerGenerateThread.join();
+                }
+
             }
             catch(Exception e){e.printStackTrace();}
-            if (Simulation.hours>= 18||Simulation.carrierOnRoad.isEmpty()) break;   //(18-7.5)*60*60+((24+21+62+21+24+22)/1.4+7*2)
+            if (Simulation.hours>= 18) break;   //(18-7.5)*60*60+((24+21+62+21+24+22)/1.4+7*2)
             else {
-                    judgeThread.run();
+                    Simulation.judgeThread.run();
                 }
             }
         }
     }
 
-
-
 class JudgeAction extends Thread {
-
     private Thread thread;
     Simulator Simulation;
-    Carrier e;
-    int temp=0;
     JudgeAction(Simulator a) {
-        Simulation = a;
+            Simulation = a;
     }
     @Override
     public void run() {
         try {
+            boolean flag=true;
+            while(flag){
+                flag=startCar(1);
+            }
+            flag=true;
+            while(flag){
+                flag=startCar(1);
+            }
             for(Carrier e:Simulation.carrierOnRoad)
             {judge(e);}
         } catch (InterruptedException interruptedException) {
@@ -139,56 +130,56 @@ class JudgeAction extends Thread {
     }
 
     void judge(Carrier e) throws InterruptedException {
-        boolean flag1=true;
-        boolean flag2=true;
-        System.out.println(e.uid+"正在运行"+e.returnLocation());
-        for(Carrier a:Simulation.totalStationMap.get(1).carrierQueue){
-            if(e.equals(a)&&flag1){
-                for(int i=0;e.isEmpty()&&Simulation.totalStationMap.get(1).passengerNumberinStation>0;i++){
-                    if(!Simulation.totalStationMap.get(1).passengerInStation.isEmpty()){
-                        e.passengerEmbark(Simulation.totalStationMap.get(1).passengerInStation.get(Simulation.totalStationMap.get(1).passengerNumberinStation-1));
-                        Simulation.totalStationMap.get(1).passengerInStation.remove(Simulation.totalStationMap.get(1).passengerNumberinStation-1);
-                        Simulation.totalStationMap.get(1).passengerNumberinStation--;
-                    }
-                    else{flag1=false;break;}
-                }
-            }
-        }
-        for(Carrier a:Simulation.totalStationMap.get(7).carrierQueue){
-            if(e.equals(a)&&flag2){
-                for(int i=0;e.isEmpty()&&Simulation.totalStationMap.get(7).passengerNumberinStation>0;i++){
-                    if(!Simulation.totalStationMap.get(7).passengerInStation.isEmpty()){
-                        e.passengerEmbark(Simulation.totalStationMap.get(7).passengerInStation.get(Simulation.totalStationMap.get(7).passengerNumberinStation-1));
-                        Simulation.totalStationMap.get(7).passengerInStation.remove(Simulation.totalStationMap.get(7).passengerNumberinStation-1);
-                        Simulation.totalStationMap.get(7).passengerNumberinStation--;
-                    }
-                    else{flag2=false;break;}
-                }
-            }
-        }
+        //boolean volveJudge=e.carrierType.equals("Volve")&&Simulation.hours>=8&&Simulation.hours<18&&Simulation.mins==30;
+        //boolean ivecoJudge=e.carrierType.equals("Iveco")&&Simulation.hours>=8&&Simulation.hours<=18&&Simulation.mins%20==0;
+
         try {
             if ((e.target == 1&&e.DistanceToFormerStation < e.nextStation.distancetoFormerStation()) || ( e.target == 2 &&e.DistanceToFormerStation < e.nextStation.distancetoLatterStation()))
                 e.carrierMovePerMinutes();
             else {
                 int downloadNum = e. arriveStation();
-                Simulation.writeLog(Simulation.returnCurrentTime() + "编号为" + e.uid + "的" + e.carrierType + "到达站点" + e.nextStation.returnFullName() + "并有" + downloadNum + "人下车\n");
+                Simulation.writeLog(Simulation.returnCurrentTime() + "编号为" + e.uid + "的" + e.carrierType + e +"到达站点" + e.nextStation.returnFullName() + "并有" + downloadNum + "人下车\n");
                 if (downloadNum != 0) {
-                    Thread.sleep(20);
+                    Simulation.timerThread.run();Simulation.timerThread.run();
                     if(!e.nextStation.equals(Simulation.totalStationMap.get(7))||!e.nextStation.equals(Simulation.totalStationMap.get(1)))e.leaveStation();
                     else{
-                        if(e.nextStation.equals(Simulation.totalStationMap.get(7))){
+                        if(e.nextStation.equals(Simulation.totalStationMap.get(7))&&e.target==1){
                             e.target=2;
-                            e.nextStation=Simulation.totalStationMap.get(6);
-                        }
-                        if(e.nextStation.equals(Simulation.totalStationMap.get(1))){
+                            Simulation.carrierOnRoad.remove(e);
+                            Simulation.totalStationMap.get(7).carrierQueue.add(e);
+                            return;
+                      }
+                        if(e.nextStation.equals(Simulation.totalStationMap.get(1))&&e.target==2){
                             e.target=1;
-                            e.nextStation=Simulation.totalStationMap.get(2);
+                            Simulation.carrierOnRoad.remove(e);
+                            Simulation.totalStationMap.get(1).carrierQueue.add(e);
+                            return;
                         }
-
+                        System.out.println(Simulation.returnCurrentTime() + e.uid + e.carrierType + "从" + e.nextStation.returnFullName() + "再出发了");
                         e.leaveStation();
                     }
                 }
-                else e.leaveStation();
+                else{
+                    if(!e.nextStation.equals(Simulation.totalStationMap.get(7))||!e.nextStation.equals(Simulation.totalStationMap.get(1)))e.leaveStation();
+                    else{
+                        if(e.nextStation.equals(Simulation.totalStationMap.get(7))&&e.target==1){
+                            e.target=2;
+                            Simulation.carrierOnRoad.remove(e);
+                            Simulation.totalStationMap.get(7).carrierQueue.add(e);
+                            return;
+                        }
+                        if(e.nextStation.equals(Simulation.totalStationMap.get(1))&&e.target==2){
+                            e.target=1;
+                            Simulation.carrierOnRoad.remove(e);
+                            Simulation.totalStationMap.get(1).carrierQueue.add(e);
+                            return;
+                        }
+                        System.out.println(Simulation.returnCurrentTime() + e.uid + e.carrierType + "从" + e.nextStation.returnFullName() + "再出发了");
+                        e.leaveStation();
+                    }
+                    System.out.println(Simulation.returnCurrentTime() + e.uid + e.carrierType + "从" + e.nextStation.returnFullName() + "再出发了");
+                    e.leaveStation();
+                }
 
             }
         }
@@ -204,6 +195,44 @@ class JudgeAction extends Thread {
             thread = new Thread(this);
             thread.start();
         }
+    }
+
+    boolean startCar(int pos){
+        Carrier e=Simulation.totalStationMap.get(pos).carrierQueue.peek();
+        if(e==null)return false;
+        boolean volveJudge=e.carrierType.equals("Volve")&&Simulation.hours>=8&&Simulation.hours<18&&Simulation.mins==30;
+        boolean ivecoJudge=e.carrierType.equals("Iveco")&&Simulation.hours>=8&&Simulation.hours<=18&&Simulation.mins%20==0;
+        //如何实现判断时间到了以后再发车呢
+        //System.out.println(e.uid+"正在运行"+e.returnLocation());
+        if(!volveJudge&&!ivecoJudge)return false;
+        //发车时间Satrt
+        if(pos==1){         //如果车子在首站宝鸡且方向是从左向右
+            while(e.isEmpty()&&!Simulation.totalStationMap.get(1).passengerInStation.isEmpty()){//只要e还没有满、站里还有人等上车，并且在指定时间内
+                //所谓isEmpty实际上是指e不是被塞满了，望周知
+                e.passengerEmbark(Simulation.totalStationMap.get(1).passengerInStation.poll());
+                Simulation.totalStationMap.get(1).passengerNumberinStation--;
+            }
+                System.out.println(Simulation.returnCurrentTime()+e.uid+e.carrierType+"从"+e.nextStation.returnFullName()+"开车了");
+                Simulation.carrierOnRoad.add(e);
+                Simulation.totalStationMap.get(pos).carrierQueue.poll();
+                e.leaveStation();
+                return true;
+        }
+        if(pos==7) {
+            while(e.isEmpty() && !Simulation.totalStationMap.get(7).passengerInStation.isEmpty()) {
+
+                //只要e还没有满、站里还有人等上车，并且在指定时间内
+                // 所谓isEmpty实际上是指e不是被塞满了，望周知
+                e.passengerEmbark(Simulation.totalStationMap.get(7).passengerInStation.peek());
+                Simulation.totalStationMap.get(7).passengerNumberinStation--;
+            }
+                System.out.println(Simulation.returnCurrentTime() + e.uid + e.carrierType + "从" + e.nextStation.returnFullName() + "开车了");
+                Simulation.carrierOnRoad.add(e);
+            Simulation.totalStationMap.get(pos).carrierQueue.poll();
+                e.leaveStation();
+                return true;
+        }
+        return false;
     }
 }
 class timer extends Thread{
@@ -227,7 +256,7 @@ class timer extends Thread{
     }
     void timeChange(){
         simulation.currentTime += 60;
-        if(simulation.mins<50)simulation.mins +=1;
+        if(simulation.mins<59)simulation.mins +=1;
         else{
             simulation.mins=0;
             simulation.hours++;

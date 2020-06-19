@@ -17,6 +17,11 @@ public class Carrier {
     public int target;                         //目标方向：1：西安；2：宝鸡
     public int timerFromLeave=0;               //从上一次离站，单位为分钟
     public int presentPassenger=0;             //现有乘客
+
+    public static void carOnRoadplus() {
+        Carrier.carOnRoad++;
+    }
+
     //方法
     public String returnLocation() {        //返回当前位置
         return this.carrierType+this.uid+"离上一站 "+this.nextStation.returnFullName()+" 已有"+(this.DistanceToFormerStation)+"米。下一站是 "+this.nextStation.returnFullName();

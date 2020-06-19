@@ -8,14 +8,14 @@ public class Station {
     int no;                     //编码
 	String Fullname;            //全称：用于输出
     String Name;                //简写
-    public List<Carrier> carrierQueue=new ArrayList<Carrier>();    //当前站内载具
-    public List<Passenger> passengerInStation=new ArrayList<Passenger>();    //站内乘客：仅在首站和终点站有实际意义
+    public Queue<Carrier> carrierQueue=new LinkedList<Carrier>();    //当前站内载具
+    public Queue<Passenger> passengerInStation=new LinkedList<Passenger>();    //站内乘客：仅在首站和终点站有实际意义
     int DistanceToFormer;       //到前一站距离
     int DistanceToLatter;       //到后一站距离
     int passengerDownload=0;    //到站人数
-    Station next;               //下一站
-    Station before;             //上一站
-    boolean firstStation=false;
+    public Station next;               //下一站
+    public Station before;             //上一站
+    public boolean firstStation=false;
     public int passengerNumberinStation=0;
     //构造函数
     public Station(String fn,String n,int dtf){

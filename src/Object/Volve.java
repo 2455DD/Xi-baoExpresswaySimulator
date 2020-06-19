@@ -7,9 +7,10 @@ public class Volve extends Car{
         this.uid=carOnRoad;
         this.carrierType="Volve";
         this.target=target;
-        this.nextStation=whereami.next;
+        this.nextStation=whereami;
         this.DistanceToFormerStation=0;
-        Carrier.carOnRoad++;
+        Carrier.carOnRoadplus();
+        System.out.println(Carrier.carOnRoad);
         Integer tempUID = uid;
         Carrier.carrierMap.put(tempUID,this);
     }
