@@ -70,7 +70,7 @@ public class Simulator extends Thread{
         return hours +"时 "+ mins +"分 ";
     }
     public void writeLog(String message){
-        //System.out.println(message);
+        System.out.println(message);
         try (Writer writer = new FileWriter(log,true)) {
             // 把内容转换成字节数组
             char[] data = message.toCharArray();
@@ -105,7 +105,7 @@ public class Simulator extends Thread{
 
             }
             catch(Exception e){e.printStackTrace();}
-            if (Simulation.hours>= 18) break;   //(18-7.5)*60*60+((24+21+62+21+24+22)/1.4+7*2)
+            if (Simulation.hours>= 18&&Simulation.carrierOnRoad.isEmpty()) break;   //(18-7.5)*60*60+((24+21+62+21+24+22)/1.4+7*2)
             else {
                     Simulation.judgeThread.run();
                 }
@@ -144,6 +144,7 @@ class JudgeAction extends Thread {
             else {
                 if(e.nextStation.equals(Simulation.totalStationMap.get(7))&&e.target==1){
                     e.target=2;
+                    Simulation.writeLog(Simulation.returnCurrentTime() + "编号为" + e.uid + "的" + e.carrierType +"到达终点站" + e.nextStation.returnFullName() +"\n");
                     Simulation.carrierOnRoad.remove(e);
                     for(Passenger a:e.passengerCollection){
                         e.passengerCollection.remove(a);
@@ -153,6 +154,7 @@ class JudgeAction extends Thread {
                 }
                 if(e.nextStation.equals(Simulation.totalStationMap.get(1))&&e.target==2){
                     e.target=1;
+                    Simulation.writeLog(Simulation.returnCurrentTime() + "编号为" + e.uid + "的" + e.carrierType +"到达终点站" + e.nextStation.returnFullName() +"\n");
                     Simulation.carrierOnRoad.remove(e);
                     Simulation.totalStationMap.get(1).carrierQueue.add(e);
                     for(Passenger a:e.passengerCollection){
@@ -161,12 +163,12 @@ class JudgeAction extends Thread {
                     return;
                 }
                 int downloadNum = e. arriveStation();
-                Simulation.writeLog(Simulation.returnCurrentTime() + "编号为" + e.uid + "的" + e.carrierType +"到达站点" + e.nextStation.returnFullName() + "并有" + downloadNum + "人下车\n");
                 if (downloadNum != 0) {
-                    System.out.println(Simulation.returnCurrentTime() + e.uid + e.carrierType + "于" + e.nextStation.returnFullName() + "靠站2min让乘客下车");
+                    Simulation.writeLog(Simulation.returnCurrentTime() + e.uid + e.carrierType + "于" + e.nextStation.returnFullName() + "靠站2min让乘客下车" + "并有" + downloadNum + "人下车\n");
                     Simulation.timerThread.run();Simulation.timerThread.run();
                 }
-                System.out.println(Simulation.returnCurrentTime() + e.uid + e.carrierType + "从" + e.nextStation.returnFullName() + "再出发了");
+                else   Simulation.writeLog(Simulation.returnCurrentTime() + e.uid + e.carrierType + "于" + e.nextStation.returnFullName() + "靠站，无人下车\n");
+                Simulation.writeLog(Simulation.returnCurrentTime() + e.uid + e.carrierType + "从" + e.nextStation.returnFullName() + "再出发了\n");
                 e.leaveStation();
                 }
         }
