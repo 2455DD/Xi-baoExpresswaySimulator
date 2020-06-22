@@ -1,6 +1,7 @@
 package Object;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Carrier {
     //属性
@@ -11,7 +12,7 @@ public class Carrier {
     public double DistanceToFormerStation;     //距离前站距离
     int maximumPassenger;               //最大运载量
     public Station nextStation;                //下一站
-    public Set<Passenger> passengerCollection=new HashSet<Passenger>();    //运载乘客
+    public Set<Passenger> passengerCollection=Collections.newSetFromMap(new ConcurrentHashMap<Passenger, Boolean>());    //运载乘客
     public double speed;                       //速度
     public boolean queueIsFull=false;          //状态：是否满载——拒绝加入新乘客与否
     public int target;                         //目标方向：1：西安；2：宝鸡
